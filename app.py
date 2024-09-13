@@ -9,7 +9,7 @@ import soundfile as sf
 from gtts import gTTS
 
 # Configure the generative AI model
-genai.configure(api_key="AIzaSyAGCM-K5xBBwr0hqwuUh_BdbCNTD4b6zJ8")
+genai.configure(api_key="")
 model = genai.GenerativeModel('gemini-1.5-flash-latest')
 
 def get_gemini_response(input, prompt, image=None):
