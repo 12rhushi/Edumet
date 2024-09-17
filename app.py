@@ -8,6 +8,11 @@ import sounddevice as sd
 import soundfile as sf
 from gtts import gTTS
 
+
+
+# Set page configuration
+st.set_page_config(page_title="Chat Interface")
+
 # Configure the generative AI model
 genai.configure(api_key="")
 model = genai.GenerativeModel('gemini-1.5-flash-latest')
@@ -26,7 +31,7 @@ def input_image_setup(uploaded_file):
         return image_parts
     else:
         return None
-
+2
 def recognize_speech(audio_file):
     r = sr.Recognizer()
     with sr.AudioFile(audio_file) as source:
@@ -47,14 +52,12 @@ def text_to_speech(text):
     audio_fp.close()
     return audio_fp.name
 
-# Set page configuration
-st.set_page_config(page_title="Chat Interface")
 
 # Define layout columns
 left_column, right_column = st.columns([2, 1])
 
 # Define paths to local GIFs
-default_gif_path = "C:/Users/rhushi/Desktop/New folder/idel.gif"
+default_gif_path = "C:/Users/rhushi/Desktop/EDUmet/Edumet/idel.gif"
 speak_gif_path = "C:/Users/rhushi/Desktop/New folder/talking.gif"
 
 # Add sidebar
