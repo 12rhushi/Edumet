@@ -71,7 +71,7 @@ with st.sidebar:
     
     # Display the current GIF based on the session state
     gif_placeholder = st.empty()
-    gif_placeholder.image(st.session_state.current_gif, caption="Current GIF", use_column_width=True)
+    gif_placeholder.image(st.session_state.current_gif, caption="Current", use_column_width=True)
 
 # Left column: Input and upload
 left_column.header("Input and Upload")
@@ -117,7 +117,7 @@ if "tts_active" in st.session_state and st.session_state.tts_active:
     st.session_state.tts_active = False
 
 # Stop TTS button logic
-stop_tts = st.button("Stop TTS")
+stop_tts = st.button("Stop")
 
 if submit:
     # Check if an image is uploaded
@@ -131,7 +131,7 @@ if submit:
     
     # Switch to speaking GIF
     st.session_state.current_gif = speak_gif_path
-    gif_placeholder.image(st.session_state.current_gif, caption="Speaking GIF", use_column_width=True)
+    gif_placeholder.image(st.session_state.current_gif, caption="Speaking", use_column_width=True)
 
     # Right column response shown when TTS starts
     right_column.subheader("The Response is")
@@ -148,13 +148,12 @@ if submit:
             sd.stop()
             st.warning("TTS Stopped")
             st.session_state.tts_active = False
-
-        # Ensure we wait for the audio to finish playing
-        sd.wait()  # Wait for playback to finish
+        else:
+            sd.wait()  # Wait for playback to finish
 
     # Revert to idle GIF after TTS playback finishes
     st.session_state.current_gif = default_gif_path
-    gif_placeholder.image(st.session_state.current_gif, caption="Idle GIF", use_column_width=True)
-    
+    gif_placeholder.image(st.session_state.current_gif, caption="Idle", use_column_width=True)  # Force update
+
     # Remove temporary audio file
     os.unlink(audio_file_path)
