@@ -115,6 +115,8 @@ and in a single paragraph just give the output in plain text format no need to g
 if "tts_active" in st.session_state and st.session_state.tts_active:
     sd.stop()  # Stop any ongoing playback
     st.session_state.tts_active = False
+    st.session_state.current_gif = default_gif_path
+    gif_placeholder.image(st.session_state.current_gif, caption="Idle", use_column_width=True)
 
 # Stop TTS button logic
 stop_tts = st.button("Stop")
@@ -146,12 +148,13 @@ if submit:
         # Poll for stopping TTS
         if stop_tts:
             sd.stop()
-            st.warning("TTS Stopped")
             st.session_state.tts_active = False
+            st.warning("TTS Stopped")
         else:
             sd.wait()  # Wait for playback to finish
 
     # Revert to idle GIF after TTS playback finishes
+    st.session_state.tts_active = False  # Ensure this is set before switching back
     st.session_state.current_gif = default_gif_path
     gif_placeholder.image(st.session_state.current_gif, caption="Idle", use_column_width=True)  # Force update
 
