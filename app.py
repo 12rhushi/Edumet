@@ -9,7 +9,6 @@ import soundfile as sf
 from gtts import gTTS
 
 
-
 # Set page configuration
 st.set_page_config(page_title="Chat Interface")
 
@@ -31,7 +30,7 @@ def input_image_setup(uploaded_file):
         return image_parts
     else:
         return None
-2
+
 def recognize_speech(audio_file):
     r = sr.Recognizer()
     with sr.AudioFile(audio_file) as source:
@@ -58,18 +57,21 @@ left_column, right_column = st.columns([2, 1])
 
 # Define paths to local GIFs
 default_gif_path = "C:/Users/rhushi/Desktop/EDUmet/Edumet/idel.gif"
-speak_gif_path = "C:/Users/rhushi/Desktop/New folder/talking.gif"
+speak_gif_path = "C:/Users/rhushi/Desktop/EDUmet/Edumet/speaking.gif"
+
+# Initialize session state for TTS and GIF switching
+if "tts_active" not in st.session_state:
+    st.session_state.tts_active = False
+if "current_gif" not in st.session_state:
+    st.session_state.current_gif = default_gif_path  # Default to idle GIF
 
 # Add sidebar
 with st.sidebar:
     st.subheader('Model')
     
-    # Display idle GIF initially
-    if os.path.exists(default_gif_path):
-        gif_placeholder = st.empty()
-        gif_placeholder.image(default_gif_path, caption="Idle GIF", use_column_width=True)
-    else:
-        st.warning("Default GIF not found")
+    # Display the current GIF based on the session state
+    gif_placeholder = st.empty()
+    gif_placeholder.image(st.session_state.current_gif, caption="Current GIF", use_column_width=True)
 
 # Left column: Input and upload
 left_column.header("Input and Upload")
@@ -109,6 +111,14 @@ right_column.header("")
 input_prompt_text = """You are a professional teacher name Fern and your work is to explain concepts in the way of an informal conversation but explain it in a decisive way
 and in a single paragraph just give the output in plain text format no need to give output in quotations"""
 
+# Stop TTS playback if session is rerun
+if "tts_active" in st.session_state and st.session_state.tts_active:
+    sd.stop()  # Stop any ongoing playback
+    st.session_state.tts_active = False
+
+# Stop TTS button logic
+stop_tts = st.button("Stop TTS")
+
 if submit:
     # Check if an image is uploaded
     image_data = input_image_setup(uploaded_file)
@@ -119,23 +129,32 @@ if submit:
     # Convert text to speech
     audio_file_path = text_to_speech(response)
     
-    # Switch to speaking GIF, play TTS, and revert to idle GIF
-    if os.path.exists(speak_gif_path):
-        gif_placeholder.image(speak_gif_path, caption="Speaking GIF", use_column_width=True)
+    # Switch to speaking GIF
+    st.session_state.current_gif = speak_gif_path
+    gif_placeholder.image(st.session_state.current_gif, caption="Speaking GIF", use_column_width=True)
 
     # Right column response shown when TTS starts
     right_column.subheader("The Response is")
     right_column.write(response)
 
-    # Play TTS audio
+    # Play TTS audio and set session state
     with st.spinner("Playing TTS..."):
         data, fs = sf.read(audio_file_path, dtype='float32')
         sd.play(data, fs)
-        sd.wait()
+        st.session_state.tts_active = True
+
+        # Poll for stopping TTS
+        if stop_tts:
+            sd.stop()
+            st.warning("TTS Stopped")
+            st.session_state.tts_active = False
+
+        # Ensure we wait for the audio to finish playing
+        sd.wait()  # Wait for playback to finish
 
     # Revert to idle GIF after TTS playback finishes
-    if os.path.exists(default_gif_path):
-        gif_placeholder.image(default_gif_path, caption="Idle GIF", use_column_width=True)
+    st.session_state.current_gif = default_gif_path
+    gif_placeholder.image(st.session_state.current_gif, caption="Idle GIF", use_column_width=True)
     
     # Remove temporary audio file
     os.unlink(audio_file_path)
